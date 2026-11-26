@@ -11,6 +11,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import model.User;
+import util.PasswordUtil;
 
 /**
  * Data Access Object for Users.
@@ -44,7 +45,7 @@ public class UserDAO {
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, username);
-            ps.setString(2, password);
+            ps.setString(2, PasswordUtil.hashPassword(password));
             ps.setString(3, fullName);
             ps.setString(4, phone);
             ps.setString(5, (role != null && !role.isEmpty()) ? role : "CUSTOMER");
@@ -76,7 +77,7 @@ public class UserDAO {
             ps.setString(3, role);
             ps.setBoolean(4, isActive);
             if (changePass) {
-                ps.setString(5, newPassword.trim());
+                ps.setString(5, PasswordUtil.hashPassword(newPassword.trim()));
                 ps.setInt(6, userId);
             } else {
                 ps.setInt(5, userId);
@@ -101,7 +102,7 @@ public class UserDAO {
             ps.setString(1, fullName);
             ps.setString(2, phone);
             if (changePass) {
-                ps.setString(3, newPassword.trim());
+                ps.setString(3, PasswordUtil.hashPassword(newPassword.trim()));
                 ps.setInt(4, userId);
             } else {
                 ps.setInt(3, userId);
@@ -187,14 +188,14 @@ public class UserDAO {
     }
 
     /**
-     * Insert new Customer quickly during Contract creation if not exists.
+     * Insert new Customer during registration (password is hashed with PBKDF2 before storing).
      */
     public int insertCustomer(String fullName, String phone, String username, String password) {
         String sql = "INSERT INTO Users (username, password, full_name, phone, role, is_active) VALUES (?, ?, ?, ?, 'CUSTOMER', 1)";
         try (Connection conn = DBContext.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
             ps.setString(1, username);
-            ps.setString(2, password);
+            ps.setString(2, PasswordUtil.hashPassword(password));
             ps.setString(3, fullName);
             ps.setString(4, phone);
             int affected = ps.executeUpdate();

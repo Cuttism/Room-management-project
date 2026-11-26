@@ -1,5 +1,7 @@
 package controller.auth;
 
+import java.io.IOException;
+
 import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -10,8 +12,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.User;
-
-import java.io.IOException;
 
 /**
  * Security filter enforcing authentication and role-based access control for /admin/* and /customer/* routes.

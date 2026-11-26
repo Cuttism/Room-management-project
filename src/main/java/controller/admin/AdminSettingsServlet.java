@@ -1,5 +1,8 @@
 package controller.admin;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -7,9 +10,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import model.ServiceRate;
 import service.AdminService;
-
-import java.io.IOException;
-import java.math.BigDecimal;
 
 /**
  * Controller for Admin Service Rates Configuration (Cài đặt đơn giá điện, nước, internet, rác).

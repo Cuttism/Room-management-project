@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.User;
+import util.PasswordUtil;
 
 /**
  * Controller for User Authentication (Login & Logout).
@@ -62,8 +63,8 @@ public class AuthServlet extends HttpServlet {
         username = username.trim();
         User user = userDAO.getUserByUsername(username);
 
-        // Simple password comparison (or add hash check if BCrypt used)
-        if (user == null || !password.equals(user.getPassword())) {
+        // Verify password against PBKDF2 hash (with fallback + auto-migration for legacy plain-text passwords)
+        if (user == null || !PasswordUtil.verifyPassword(password, user.getPassword())) {
             req.setAttribute("errorMessage", "Tên đăng nhập hoặc mật khẩu không chính xác!");
             req.setAttribute("enteredUsername", username);
             req.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(req, resp);
@@ -74,6 +75,12 @@ public class AuthServlet extends HttpServlet {
             req.setAttribute("errorMessage", "Tài khoản này đã bị khóa hoặc ngừng hoạt động!");
             req.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(req, resp);
             return;
+        }
+
+        // Automatically upgrade legacy plain-text password in database to PBKDF2 hash upon login
+        if (!PasswordUtil.isHashed(user.getPassword())) {
+            userDAO.updateProfile(user.getUserId(), user.getFullName(), user.getPhone(), password);
+            user = userDAO.getUserById(user.getUserId());
         }
 
         // Store user in session

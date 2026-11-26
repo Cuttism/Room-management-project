@@ -113,16 +113,16 @@ BEGIN
     INSERT INTO ServiceRates (electricity_per_kwh, water_per_m3, internet_fee, trash_fee)
     VALUES (3500.00, 25000.00, 100000.00, 50000.00);
 END
--- 2. Thêm Tài khoản mẫu (Admin & Khách thuê)
+-- 2. Thêm Tài khoản mẫu (Admin & Khách thuê - Mật khẩu mặc định: 123456 đã mã hóa PBKDF2-HMAC-SHA256)
 IF NOT EXISTS (SELECT * FROM Users WHERE username = 'admin')
 BEGIN
     INSERT INTO Users (username, password, full_name, phone, role, is_active)
     VALUES 
-    ('admin', '123456', N'Chủ Nhà Trọ', '0901234567', 'ADMIN', 1),
-    ('khach1', '123456', N'Nguyễn Văn An', '0912345678', 'CUSTOMER', 1),
-    ('khach2', '123456', N'Trần Thị Bình', '0987654321', 'CUSTOMER', 1),
-    ('khach3', '123456', N'Lê Hoàng Cường', '0933445566', 'CUSTOMER', 1),
-    ('khach4', '123456', N'Phạm Minh Dung', '0977889900', 'CUSTOMER', 1);
+    ('admin', 'pbkdf2$65536$jes8UcCw38VeGkDFWpYA0Q==$HBboQgfOGP24N/Tjy81kyqKGBtoiUVG8kKcMKugZI2I=', N'Chủ Nhà Trọ', '0901234567', 'ADMIN', 1),
+    ('khach1', 'pbkdf2$65536$jes8UcCw38VeGkDFWpYA0Q==$HBboQgfOGP24N/Tjy81kyqKGBtoiUVG8kKcMKugZI2I=', N'Nguyễn Văn An', '0912345678', 'CUSTOMER', 1),
+    ('khach2', 'pbkdf2$65536$jes8UcCw38VeGkDFWpYA0Q==$HBboQgfOGP24N/Tjy81kyqKGBtoiUVG8kKcMKugZI2I=', N'Trần Thị Bình', '0987654321', 'CUSTOMER', 1),
+    ('khach3', 'pbkdf2$65536$jes8UcCw38VeGkDFWpYA0Q==$HBboQgfOGP24N/Tjy81kyqKGBtoiUVG8kKcMKugZI2I=', N'Lê Hoàng Cường', '0933445566', 'CUSTOMER', 1),
+    ('khach4', 'pbkdf2$65536$jes8UcCw38VeGkDFWpYA0Q==$HBboQgfOGP24N/Tjy81kyqKGBtoiUVG8kKcMKugZI2I=', N'Phạm Minh Dung', '0977889900', 'CUSTOMER', 1);
 END
 
 -- 3. Thêm Phòng trọ mẫu

@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import model.User;
+import util.PasswordUtil;
 
 /**
  * Controller for viewing and updating the logged-in user's profile and password.
@@ -74,7 +75,7 @@ public class ProfileServlet extends HttpServlet {
         String passwordToSave = null;
         if (newPassword != null && !newPassword.trim().isEmpty()) {
             User dbUser = userDAO.getUserById(currentUser.getUserId());
-            if (currentPassword == null || dbUser == null || !currentPassword.equals(dbUser.getPassword())) {
+            if (currentPassword == null || dbUser == null || !PasswordUtil.verifyPassword(currentPassword, dbUser.getPassword())) {
                 req.setAttribute("errorMessage", "Mật khẩu hiện tại không chính xác!");
                 req.setAttribute("user", currentUser);
                 req.getRequestDispatcher(targetView).forward(req, resp);
