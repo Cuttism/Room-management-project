@@ -1,0 +1,25 @@
+# Maven build output
+target/
+*.war
+*.ear
+!src/main/webapp/WEB-INF/lib/*.jar
+
+# Local bundled Tomcat server
+tomcat/
+
+# Compiled classes inside webapp
+src/main/webapp/WEB-INF/classes/
+*.class
+
+# Eclipse / IDE settings
+.classpath
+.project
+.settings/
+.idea/
+*.iml
+.vscode/
+.freebuff/
+
+# OS temporary files
+.DS_Store
+Thumbs.db
