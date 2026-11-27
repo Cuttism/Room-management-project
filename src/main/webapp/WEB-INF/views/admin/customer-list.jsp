@@ -40,6 +40,18 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 </c:if>
+<c:if test="${param.error == 'CannotLockSelf'}">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Bị chặn bởi ràng buộc bảo mật:</strong> Bạn không thể tự khóa tài khoản Quản trị viên đang đăng nhập!
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</c:if>
+<c:if test="${param.error == 'UserNotFound'}">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle me-2"></i>Không tìm thấy tài khoản người dùng yêu cầu!
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</c:if>
 
 <div class="card-custom">
     <div class="table-responsive">
@@ -47,8 +59,8 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Tên đăng nhập</th>
                     <th>Họ và tên</th>
+                    <th>Email</th>
                     <th>Số điện thoại</th>
                     <th>Vai trò</th>
                     <th>Trạng thái</th>
@@ -59,8 +71,8 @@
                 <c:forEach items="${users}" var="u">
                     <tr>
                         <td class="fw-semibold text-primary">#U-${u.userId}</td>
-                        <td><code><c:out value="${u.username}" /></code></td>
                         <td class="fw-medium text-slate-800"><c:out value="${u.fullName}" /></td>
+                        <td><i class="bi bi-envelope text-muted me-1"></i><c:out value="${u.email}" /></td>
                         <td><i class="bi bi-telephone text-muted me-1"></i><c:out value="${u.phone}" /></td>
                         <td>
                             <c:choose>

@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
@@ -56,7 +56,7 @@
                             <option value="">-- Chọn khách thuê đã đăng ký --</option>
                             <c:forEach items="${customers}" var="u">
                                 <option value="${u.userId}">
-                                    ${u.fullName} (SĐT: ${u.phone} - User: ${u.username})
+                                    ${u.fullName} (SĐT: ${u.phone} - Email: ${u.email})
                                 </option>
                             </c:forEach>
                         </select>

@@ -37,8 +37,8 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="username" class="form-label fw-semibold">Tên đăng nhập (Username) <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="username" name="username" value="<c:out value='${enteredUsername}'/>" placeholder="Nhập tên tài khoản" required>
+                        <label for="email" class="form-label fw-semibold">Địa chỉ Email <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="email" name="email" value="<c:out value='${enteredEmail}'/>" placeholder="Ví dụ: nguyenvana@gmail.com" required>
                     </div>
 
                     <div class="mb-3">
@@ -56,11 +56,51 @@
                             <i class="bi bi-check2-circle me-1"></i> Hoàn tất đăng ký
                         </button>
                     </div>
-
-                    <div class="text-center small text-muted">
-                        Đã có tài khoản? <a href="${pageContext.request.contextPath}/login" class="text-primary fw-semibold text-decoration-none">Đăng nhập tại đây</a>
-                    </div>
                 </form>
+
+                <!-- Divider -->
+                <div class="d-flex align-items-center my-3">
+                    <hr class="flex-grow-1 text-muted">
+                    <span class="px-2 small text-muted">Hoặc đăng ký nhanh bằng</span>
+                    <hr class="flex-grow-1 text-muted">
+                </div>
+
+                <!-- Google Sign-Up / Sign-In Button -->
+                <form id="googleRegisterForm" action="${pageContext.request.contextPath}/login/google" method="post" class="d-none">
+                    <input type="hidden" name="credential" id="googleRegCredentialInput">
+                </form>
+                <div class="d-flex justify-content-center mb-3">
+                    <div id="g_id_onload"
+                         data-client_id="265168256933-o1bdbborcthrks671vocs159brnb8h1v.apps.googleusercontent.com"
+                         data-context="signup"
+                         data-ux_mode="popup"
+                         data-callback="handleGoogleRegResponse"
+                         data-auto_prompt="false">
+                    </div>
+                    <div class="g_id_signin"
+                         data-type="standard"
+                         data-shape="rectangular"
+                         data-theme="outline"
+                         data-text="signup_with"
+                         data-size="large"
+                         data-logo_alignment="left"
+                         data-width="340">
+                    </div>
+                </div>
+
+                <div class="text-center small text-muted">
+                    Đã có tài khoản? <a href="${pageContext.request.contextPath}/login" class="text-primary fw-semibold text-decoration-none">Đăng nhập tại đây</a>
+                </div>
+
+                <script src="https://accounts.google.com/gsi/client" async defer></script>
+                <script>
+                    function handleGoogleRegResponse(response) {
+                        if (response && response.credential) {
+                            document.getElementById("googleRegCredentialInput").value = response.credential;
+                            document.getElementById("googleRegisterForm").submit();
+                        }
+                    }
+                </script>
             </div>
         </div>
     </div>

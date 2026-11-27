@@ -75,10 +75,28 @@ public class AdminContractServlet extends HttpServlet {
                 Date endDate = Date.valueOf(endDateStr);
                 BigDecimal deposit = new BigDecimal(depositStr);
 
-                adminService.createContract(roomId, userId, startDate, endDate, deposit);
+                if (!endDate.after(startDate)) {
+                    throw new IllegalArgumentException("Ngày kết thúc hợp đồng phải lớn hơn ngày bắt đầu thuê!");
+                }
+                if (deposit.compareTo(BigDecimal.ZERO) < 0) {
+                    throw new IllegalArgumentException("Số tiền đặt cọc không được nhỏ hơn 0 VNĐ!");
+                }
+                Room room = adminService.getRoomById(roomId);
+                if (room == null || !"AVAILABLE".equalsIgnoreCase(room.getStatus()) || adminService.hasActiveContractByRoomId(roomId)) {
+                    throw new IllegalArgumentException("Phòng đã chọn hiện không còn trống hoặc đang có một hợp đồng hiệu lực khác!");
+                }
+                User customer = adminService.getUserById(userId);
+                if (customer == null || !customer.isActive()) {
+                    throw new IllegalArgumentException("Tài khoản khách thuê không tồn tại hoặc đang bị khóa!");
+                }
+
+                int contractId = adminService.createContract(roomId, userId, startDate, endDate, deposit);
+                if (contractId <= 0) {
+                    throw new IllegalStateException("Không thể lưu hợp đồng do vi phạm ràng buộc cơ sở dữ liệu!");
+                }
                 resp.sendRedirect(req.getContextPath() + "/admin/contracts?msg=ContractCreated");
             } catch (Exception e) {
-                req.setAttribute("errorMessage", "Thông tin hợp đồng không hợp lệ: " + e.getMessage());
+                req.setAttribute("errorMessage", "Bị chặn bởi ràng buộc hợp đồng: " + e.getMessage());
                 req.setAttribute("rooms", adminService.getAvailableRooms());
                 req.setAttribute("customers", adminService.getActiveCustomers());
                 req.getRequestDispatcher("/WEB-INF/views/admin/contract-form.jsp").forward(req, resp);
@@ -91,9 +109,29 @@ public class AdminContractServlet extends HttpServlet {
             int finalElec = parseId(req.getParameter("finalElec"));
             int finalWater = parseId(req.getParameter("finalWater"));
 
+            Contract c = adminService.getContractById(contractId);
+            if (c == null) {
+                resp.sendRedirect(req.getContextPath() + "/admin/contracts?error=NotFound");
+                return;
+            }
+
             try {
                 Date actualEndDate = Date.valueOf(actualEndDateStr);
-                Contract c = adminService.getContractById(contractId);
+                if (c.getStartDate() != null && actualEndDate.before(c.getStartDate())) {
+                    throw new IllegalArgumentException("Ngày trả phòng thực tế không được nhỏ hơn ngày bắt đầu hợp đồng (" + c.getStartDate() + ")!");
+                }
+
+                model.Invoice latestInv = adminService.getLatestInvoice(contractId);
+                int oldElec = latestInv != null ? latestInv.getNewElec() : 0;
+                int oldWater = latestInv != null ? latestInv.getNewWater() : 0;
+
+                if (finalElec < oldElec) {
+                    throw new IllegalArgumentException("Chỉ số điện chốt cuối (" + finalElec + " kWh) không được nhỏ hơn chỉ số điện cũ (" + oldElec + " kWh)!");
+                }
+                if (finalWater < oldWater) {
+                    throw new IllegalArgumentException("Chỉ số nước chốt cuối (" + finalWater + " m3) không được nhỏ hơn chỉ số nước cũ (" + oldWater + " m3)!");
+                }
+
                 // Perform settlement calculation
                 Map<String, Object> settlement = adminService.calculateSettlement(c, actualEndDate, finalElec, finalWater);
                 // Terminate contract and free room
@@ -104,7 +142,11 @@ public class AdminContractServlet extends HttpServlet {
                 req.getSession().setAttribute("settledContract", c);
                 resp.sendRedirect(req.getContextPath() + "/admin/contracts?msg=TerminatedSuccessfully");
             } catch (Exception e) {
-                resp.sendRedirect(req.getContextPath() + "/admin/contracts/terminate?id=" + contractId + "&error=Failed");
+                req.setAttribute("errorMessage", "Bị chặn bởi ràng buộc quyết toán: " + e.getMessage());
+                req.setAttribute("contract", c);
+                req.setAttribute("rates", adminService.getServiceRates());
+                req.setAttribute("latestInvoice", adminService.getLatestInvoice(contractId));
+                req.getRequestDispatcher("/WEB-INF/views/admin/contract-terminate.jsp").forward(req, resp);
             }
         }
     }

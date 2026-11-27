@@ -26,7 +26,7 @@ public class ContractDAO {
     public List<Contract> getAllContracts() {
         List<Contract> list = new ArrayList<>();
         String sql = "SELECT c.contract_id, c.room_id, c.user_id, c.start_date, c.end_date, c.deposit_amount, c.actual_end_date, c.status, " +
-                     "r.room_number, r.base_price, u.full_name, u.phone, u.username " +
+                     "r.room_number, r.base_price, u.full_name, u.phone, u.email " +
                      "FROM Contracts c " +
                      "JOIN Rooms r ON c.room_id = r.room_id " +
                      "JOIN Users u ON c.user_id = u.user_id " +
@@ -49,7 +49,7 @@ public class ContractDAO {
     public List<Contract> getActiveContracts() {
         List<Contract> list = new ArrayList<>();
         String sql = "SELECT c.contract_id, c.room_id, c.user_id, c.start_date, c.end_date, c.deposit_amount, c.actual_end_date, c.status, " +
-                     "r.room_number, r.base_price, u.full_name, u.phone, u.username " +
+                     "r.room_number, r.base_price, u.full_name, u.phone, u.email " +
                      "FROM Contracts c " +
                      "JOIN Rooms r ON c.room_id = r.room_id " +
                      "JOIN Users u ON c.user_id = u.user_id " +
@@ -68,11 +68,28 @@ public class ContractDAO {
     }
 
     /**
+     * Check whether a room currently has an ACTIVE contract.
+     */
+    public boolean hasActiveContractByRoomId(int roomId) {
+        String sql = "SELECT 1 FROM Contracts WHERE room_id = ? AND status = 'ACTIVE'";
+        try (Connection conn = DBContext.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, roomId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException e) {
+            LOGGER.log(Level.SEVERE, "Error hasActiveContractByRoomId", e);
+        }
+        return false;
+    }
+
+    /**
      * Get Contract by ID.
      */
     public Contract getContractById(int contractId) {
         String sql = "SELECT c.contract_id, c.room_id, c.user_id, c.start_date, c.end_date, c.deposit_amount, c.actual_end_date, c.status, " +
-                     "r.room_number, r.base_price, u.full_name, u.phone, u.username " +
+                     "r.room_number, r.base_price, u.full_name, u.phone, u.email " +
                      "FROM Contracts c " +
                      "JOIN Rooms r ON c.room_id = r.room_id " +
                      "JOIN Users u ON c.user_id = u.user_id " +
@@ -199,7 +216,7 @@ public class ContractDAO {
         u.setUserId(c.getUserId());
         u.setFullName(rs.getString("full_name"));
         u.setPhone(rs.getString("phone"));
-        u.setUsername(rs.getString("username"));
+        u.setEmail(rs.getString("email"));
         c.setUser(u);
 
         return c;

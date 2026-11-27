@@ -57,6 +57,10 @@ public class AdminRoomServlet extends HttpServlet {
 
             case "/admin/rooms/delete":
                 int delId = parseId(req.getParameter("id"));
+                if (adminService.hasActiveContractByRoomId(delId)) {
+                    resp.sendRedirect(req.getContextPath() + "/admin/rooms?error=RoomOccupiedCannotDelete");
+                    return;
+                }
                 adminService.softDeleteRoom(delId);
                 resp.sendRedirect(req.getContextPath() + "/admin/rooms?msg=DeletedSuccessfully");
                 break;
@@ -88,6 +92,35 @@ public class AdminRoomServlet extends HttpServlet {
 
         BigDecimal basePrice = (basePriceStr != null && !basePriceStr.isEmpty()) ? new BigDecimal(basePriceStr) : BigDecimal.ZERO;
         int maxOccupants = (maxOccupantsStr != null && !maxOccupantsStr.isEmpty()) ? Integer.parseInt(maxOccupantsStr) : 2;
+        boolean isEditMode = "/admin/rooms/edit".equals(servletPath);
+        int editRoomId = isEditMode ? parseId(req.getParameter("roomId")) : 0;
+
+        if (basePrice.compareTo(BigDecimal.ZERO) <= 0) {
+            req.setAttribute("errorMessage", "Ràng buộc dữ liệu: Giá thuê phòng cơ bản phải lớn hơn 0 VNĐ!");
+            req.setAttribute("isEdit", isEditMode);
+            if (isEditMode) req.setAttribute("room", adminService.getRoomById(editRoomId));
+            req.setAttribute("libraryImages", adminService.getLibraryImages());
+            req.getRequestDispatcher("/WEB-INF/views/admin/room-form.jsp").forward(req, resp);
+            return;
+        }
+
+        if (maxOccupants < 1 || maxOccupants > 20) {
+            req.setAttribute("errorMessage", "Ràng buộc dữ liệu: Số người ở tối đa phải từ 1 đến 20 người!");
+            req.setAttribute("isEdit", isEditMode);
+            if (isEditMode) req.setAttribute("room", adminService.getRoomById(editRoomId));
+            req.setAttribute("libraryImages", adminService.getLibraryImages());
+            req.getRequestDispatcher("/WEB-INF/views/admin/room-form.jsp").forward(req, resp);
+            return;
+        }
+
+        if (isEditMode && adminService.hasActiveContractByRoomId(editRoomId) && !"OCCUPIED".equalsIgnoreCase(status)) {
+            req.setAttribute("errorMessage", "Ràng buộc nghiệp vụ: Phòng này đang có hợp đồng thuê hiệu lực (ACTIVE) nên không thể chuyển sang trạng thái '" + status + "'. Vui lòng thanh lý hợp đồng trước!");
+            req.setAttribute("isEdit", true);
+            req.setAttribute("room", adminService.getRoomById(editRoomId));
+            req.setAttribute("libraryImages", adminService.getLibraryImages());
+            req.getRequestDispatcher("/WEB-INF/views/admin/room-form.jsp").forward(req, resp);
+            return;
+        }
 
         // 1. Process uploaded multi images from computer
         List<String> imageUrls = saveUploadedImages(req);

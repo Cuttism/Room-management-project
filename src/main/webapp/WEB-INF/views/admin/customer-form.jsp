@@ -16,7 +16,7 @@
                 <h5 class="fw-bold mb-0 text-slate-800">
                     <i class="bi ${isEdit ? 'bi-person-gear text-warning' : 'bi-person-plus text-primary'} me-2"></i>
                     ${isEdit ? 'Cập nhật tài khoản ' : 'Tạo tài khoản mới'}
-                    <c:if test="${isEdit}"><span class="text-primary">@<c:out value="${customer.username}" /></span></c:if>
+                    <c:if test="${isEdit}"><span class="text-primary"><c:out value="${customer.email}" /></span></c:if>
                 </h5>
                 <a href="${pageContext.request.contextPath}/admin/customers" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
@@ -37,10 +37,10 @@
 
                 <div class="row g-3 mb-3">
                     <div class="col-md-6">
-                        <label for="username" class="form-label fw-semibold">Tên đăng nhập <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control" id="username" name="username"
-                               value="<c:out value='${isEdit ? customer.username : ""}'/>"
-                               ${isEdit ? 'readonly' : 'required'} placeholder="Ví dụ: khach3">
+                        <label for="email" class="form-label fw-semibold">Địa chỉ Email <span class="text-danger">*</span></label>
+                        <input type="email" class="form-control" id="email" name="email"
+                               value="<c:out value='${isEdit ? customer.email : ""}'/>"
+                               required placeholder="Ví dụ: khach3@gmail.com">
                     </div>
 
                     <div class="col-md-6">

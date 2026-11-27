@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
@@ -27,6 +27,13 @@
             </div>
 
             <!-- Contract overview card -->
+            <c:if test="${not empty errorMessage}">
+                <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>${errorMessage}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </c:if>
+
             <div class="bg-light rounded p-3 mb-4 border">
                 <div class="row g-3">
                     <div class="col-sm-4">

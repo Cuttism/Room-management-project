@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
@@ -40,6 +40,18 @@
 <c:if test="${param.msg == 'DeletedSuccessfully'}">
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
         <i class="bi bi-trash me-2"></i>Đã xóa (Soft Delete) phòng thành công!
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</c:if>
+<c:if test="${param.error == 'RoomOccupiedCannotDelete'}">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i><strong>Bị chặn bởi ràng buộc hợp đồng:</strong> Không thể xóa phòng này vì đang có hợp đồng thuê còn hiệu lực (ACTIVE). Vui lòng thanh lý hợp đồng trước khi xóa phòng!
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+</c:if>
+<c:if test="${param.error == 'RoomNotFound'}">
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-circle me-2"></i>Không tìm thấy thông tin phòng trọ yêu cầu!
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 </c:if>

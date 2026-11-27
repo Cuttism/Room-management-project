@@ -62,6 +62,11 @@ public class AdminCustomerServlet extends HttpServlet {
         if ("/admin/customers/toggle".equals(servletPath)) {
             int userId = parseId(req.getParameter("userId"));
             boolean active = "true".equalsIgnoreCase(req.getParameter("active")) || "1".equals(req.getParameter("active"));
+            User currentUser = (req.getSession(false) != null) ? (User) req.getSession(false).getAttribute("currentUser") : null;
+            if (currentUser != null && currentUser.getUserId() == userId && !active) {
+                resp.sendRedirect(req.getContextPath() + "/admin/customers?error=CannotLockSelf");
+                return;
+            }
             adminService.toggleUserActive(userId, active);
             resp.sendRedirect(req.getContextPath() + "/admin/customers?msg=StatusUpdated");
             return;
@@ -69,33 +74,62 @@ public class AdminCustomerServlet extends HttpServlet {
 
         String fullName = req.getParameter("fullName");
         String phone = req.getParameter("phone");
-        String username = req.getParameter("username");
+        String email = req.getParameter("email");
         String password = req.getParameter("password");
         String role = req.getParameter("role");
         boolean isActive = req.getParameter("isActive") != null;
 
         if ("/admin/customers/create".equals(servletPath)) {
             if (fullName == null || fullName.trim().isEmpty()
-                    || username == null || username.trim().isEmpty()
+                    || email == null || email.trim().isEmpty()
+                    || phone == null || phone.trim().isEmpty()
                     || password == null || password.trim().isEmpty()) {
-                req.setAttribute("errorMessage", "Vui lòng nhập đầy đủ họ tên, tên đăng nhập và mật khẩu!");
+                req.setAttribute("errorMessage", "Vui lòng nhập đầy đủ họ tên, email, số điện thoại và mật khẩu!");
                 req.setAttribute("isEdit", false);
                 req.getRequestDispatcher("/WEB-INF/views/admin/customer-form.jsp").forward(req, resp);
                 return;
             }
 
-            if (adminService.getUserByUsername(username.trim()) != null) {
-                req.setAttribute("errorMessage", "Tên đăng nhập '" + username.trim() + "' đã tồn tại!");
+            if (!email.trim().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                req.setAttribute("errorMessage", "Ràng buộc dữ liệu: Định dạng địa chỉ Email không hợp lệ!");
+                req.setAttribute("isEdit", false);
+                req.getRequestDispatcher("/WEB-INF/views/admin/customer-form.jsp").forward(req, resp);
+                return;
+            }
+
+            if (!phone.trim().matches("^0\\d{9}$")) {
+                req.setAttribute("errorMessage", "Ràng buộc dữ liệu: Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0!");
+                req.setAttribute("isEdit", false);
+                req.getRequestDispatcher("/WEB-INF/views/admin/customer-form.jsp").forward(req, resp);
+                return;
+            }
+
+            if (password.trim().length() < 6) {
+                req.setAttribute("errorMessage", "Ràng buộc bảo mật: Mật khẩu khởi tạo phải có ít nhất 6 ký tự!");
+                req.setAttribute("isEdit", false);
+                req.getRequestDispatcher("/WEB-INF/views/admin/customer-form.jsp").forward(req, resp);
+                return;
+            }
+
+            if (adminService.getUserByEmail(email.trim()) != null) {
+                req.setAttribute("errorMessage", "Ràng buộc chống trùng: Địa chỉ email '" + email.trim() + "' đã tồn tại!");
+                req.setAttribute("isEdit", false);
+                req.getRequestDispatcher("/WEB-INF/views/admin/customer-form.jsp").forward(req, resp);
+                return;
+            }
+
+            if (adminService.getUserByPhone(phone.trim()) != null) {
+                req.setAttribute("errorMessage", "Ràng buộc chống trùng: Số điện thoại '" + phone.trim() + "' đã tồn tại!");
                 req.setAttribute("isEdit", false);
                 req.getRequestDispatcher("/WEB-INF/views/admin/customer-form.jsp").forward(req, resp);
                 return;
             }
 
             int newId = adminService.createUser(
-                username.trim(),
+                email.trim(),
                 password.trim(),
                 fullName.trim(),
-                phone != null ? phone.trim() : "",
+                phone.trim(),
                 role != null ? role : "CUSTOMER",
                 isActive
             );
@@ -110,8 +144,55 @@ public class AdminCustomerServlet extends HttpServlet {
 
         } else if ("/admin/customers/edit".equals(servletPath)) {
             int userId = parseId(req.getParameter("userId"));
+            String cleanEmail = email != null ? email.trim() : "";
+            String cleanPhone = phone != null ? phone.trim() : "";
+
+            if (!cleanEmail.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+                req.setAttribute("errorMessage", "Ràng buộc dữ liệu: Định dạng địa chỉ Email không hợp lệ!");
+                req.setAttribute("isEdit", true);
+                req.setAttribute("customer", adminService.getUserById(userId));
+                req.getRequestDispatcher("/WEB-INF/views/admin/customer-form.jsp").forward(req, resp);
+                return;
+            }
+
+            if (!cleanPhone.isEmpty() && !cleanPhone.matches("^0\\d{9}$")) {
+                req.setAttribute("errorMessage", "Ràng buộc dữ liệu: Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0!");
+                req.setAttribute("isEdit", true);
+                req.setAttribute("customer", adminService.getUserById(userId));
+                req.getRequestDispatcher("/WEB-INF/views/admin/customer-form.jsp").forward(req, resp);
+                return;
+            }
+
+            if (password != null && !password.trim().isEmpty() && password.trim().length() < 6) {
+                req.setAttribute("errorMessage", "Ràng buộc bảo mật: Mật khẩu mới phải có ít nhất 6 ký tự!");
+                req.setAttribute("isEdit", true);
+                req.setAttribute("customer", adminService.getUserById(userId));
+                req.getRequestDispatcher("/WEB-INF/views/admin/customer-form.jsp").forward(req, resp);
+                return;
+            }
+
+            User existingEmailUser = adminService.getUserByEmail(cleanEmail);
+            if (existingEmailUser != null && existingEmailUser.getUserId() != userId) {
+                req.setAttribute("errorMessage", "Ràng buộc chống trùng: Địa chỉ email '" + cleanEmail + "' đã thuộc về một tài khoản khác!");
+                req.setAttribute("isEdit", true);
+                req.setAttribute("customer", adminService.getUserById(userId));
+                req.getRequestDispatcher("/WEB-INF/views/admin/customer-form.jsp").forward(req, resp);
+                return;
+            }
+
+            if (!cleanPhone.isEmpty()) {
+                User existingPhoneUser = adminService.getUserByPhone(cleanPhone);
+                if (existingPhoneUser != null && existingPhoneUser.getUserId() != userId) {
+                    req.setAttribute("errorMessage", "Ràng buộc chống trùng: Số điện thoại '" + cleanPhone + "' đã thuộc về một tài khoản khác!");
+                    req.setAttribute("isEdit", true);
+                    req.setAttribute("customer", adminService.getUserById(userId));
+                    req.getRequestDispatcher("/WEB-INF/views/admin/customer-form.jsp").forward(req, resp);
+                    return;
+                }
+            }
             boolean ok = adminService.updateUser(
                 userId,
+                email != null ? email.trim() : "",
                 fullName != null ? fullName.trim() : "",
                 phone != null ? phone.trim() : "",
                 role != null ? role : "CUSTOMER",
@@ -121,7 +202,7 @@ public class AdminCustomerServlet extends HttpServlet {
             if (ok) {
                 resp.sendRedirect(req.getContextPath() + "/admin/customers?msg=UpdatedSuccessfully");
             } else {
-                req.setAttribute("errorMessage", "Không thể cập nhật thông tin tài khoản!");
+                req.setAttribute("errorMessage", "Không thể cập nhật thông tin tài khoản (Email hoặc SĐT có thể đã trùng)!");
                 req.setAttribute("isEdit", true);
                 req.setAttribute("customer", adminService.getUserById(userId));
                 req.getRequestDispatcher("/WEB-INF/views/admin/customer-form.jsp").forward(req, resp);

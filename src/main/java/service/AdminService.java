@@ -40,16 +40,20 @@ public class AdminService {
         return userDAO.getUserById(userId);
     }
 
-    public User getUserByUsername(String username) {
-        return userDAO.getUserByUsername(username);
+    public User getUserByEmail(String email) {
+        return userDAO.getUserByEmail(email);
     }
 
-    public int createUser(String username, String password, String fullName, String phone, String role, boolean isActive) {
-        return userDAO.insertUser(username, password, fullName, phone, role, isActive);
+    public User getUserByPhone(String phone) {
+        return userDAO.getUserByPhone(phone);
     }
 
-    public boolean updateUser(int userId, String fullName, String phone, String role, boolean isActive, String newPassword) {
-        return userDAO.updateUser(userId, fullName, phone, role, isActive, newPassword);
+    public int createUser(String email, String password, String fullName, String phone, String role, boolean isActive) {
+        return userDAO.insertUser(email, password, fullName, phone, role, isActive);
+    }
+
+    public boolean updateUser(int userId, String email, String fullName, String phone, String role, boolean isActive, String newPassword) {
+        return userDAO.updateUser(userId, email, fullName, phone, role, isActive, newPassword);
     }
 
     public boolean toggleUserActive(int userId, boolean isActive) {
@@ -145,6 +149,10 @@ public class AdminService {
 
     public Contract getContractById(int contractId) {
         return contractDAO.getContractById(contractId);
+    }
+
+    public boolean hasActiveContractByRoomId(int roomId) {
+        return contractDAO.hasActiveContractByRoomId(roomId);
     }
 
     public List<User> getActiveCustomers() {

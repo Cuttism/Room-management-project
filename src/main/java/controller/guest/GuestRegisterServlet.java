@@ -27,17 +27,17 @@ public class GuestRegisterServlet extends HttpServlet {
         req.setCharacterEncoding("UTF-8");
         String fullName = req.getParameter("fullName");
         String phone = req.getParameter("phone");
-        String username = req.getParameter("username");
+        String email = req.getParameter("email");
         String password = req.getParameter("password");
         String confirmPassword = req.getParameter("confirmPassword");
 
         req.setAttribute("enteredFullName", fullName);
         req.setAttribute("enteredPhone", phone);
-        req.setAttribute("enteredUsername", username);
+        req.setAttribute("enteredEmail", email);
 
         if (fullName == null || fullName.trim().isEmpty()
                 || phone == null || phone.trim().isEmpty()
-                || username == null || username.trim().isEmpty()
+                || email == null || email.trim().isEmpty()
                 || password == null || password.trim().isEmpty()) {
             req.setAttribute("errorMessage", "Vui lòng điền đầy đủ tất cả các trường thông tin!");
             req.getRequestDispatcher("/WEB-INF/views/guest/register.jsp").forward(req, resp);
@@ -56,17 +56,39 @@ public class GuestRegisterServlet extends HttpServlet {
             return;
         }
 
-        username = username.trim();
-        // Check if username already exists in database
-        User existingUser = userDAO.getUserByUsername(username);
-        if (existingUser != null) {
-            req.setAttribute("errorMessage", "Tên đăng nhập '" + username + "' đã có người sử dụng. Vui lòng chọn tên khác!");
+        email = email.trim();
+        phone = phone.trim();
+
+        if (!email.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+            req.setAttribute("errorMessage", "Định dạng địa chỉ Email không hợp lệ!");
+            req.getRequestDispatcher("/WEB-INF/views/guest/register.jsp").forward(req, resp);
+            return;
+        }
+
+        if (!phone.matches("^0\\d{9}$")) {
+            req.setAttribute("errorMessage", "Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0 (ví dụ: 0912345678)!");
+            req.getRequestDispatcher("/WEB-INF/views/guest/register.jsp").forward(req, resp);
+            return;
+        }
+
+        // Check if email already exists in database
+        User existingByEmail = userDAO.getUserByEmail(email);
+        if (existingByEmail != null) {
+            req.setAttribute("errorMessage", "Địa chỉ email '" + email + "' đã được đăng ký. Vui lòng dùng email khác!");
+            req.getRequestDispatcher("/WEB-INF/views/guest/register.jsp").forward(req, resp);
+            return;
+        }
+
+        // Check if phone already exists in database
+        User existingByPhone = userDAO.getUserByPhone(phone);
+        if (existingByPhone != null) {
+            req.setAttribute("errorMessage", "Số điện thoại '" + phone + "' đã được đăng ký. Vui lòng dùng số khác!");
             req.getRequestDispatcher("/WEB-INF/views/guest/register.jsp").forward(req, resp);
             return;
         }
 
         // Insert new customer into Users table in SQL Server
-        int newId = userDAO.insertCustomer(fullName.trim(), phone.trim(), username, password.trim());
+        int newId = userDAO.insertCustomer(fullName.trim(), phone, email, password.trim());
         if (newId > 0) {
             resp.sendRedirect(req.getContextPath() + "/login?msg=registered");
         } else {

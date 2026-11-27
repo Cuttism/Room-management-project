@@ -34,6 +34,11 @@ public class AdminSettingsServlet extends HttpServlet {
             BigDecimal internet = new BigDecimal(req.getParameter("internetFee").trim());
             BigDecimal trash = new BigDecimal(req.getParameter("trashFee").trim());
 
+            if (elec.compareTo(BigDecimal.ZERO) < 0 || water.compareTo(BigDecimal.ZERO) < 0
+                    || internet.compareTo(BigDecimal.ZERO) < 0 || trash.compareTo(BigDecimal.ZERO) < 0) {
+                throw new IllegalArgumentException("Đơn giá điện, nước và phí dịch vụ không được phép nhỏ hơn 0!");
+            }
+
             ServiceRate updated = new ServiceRate(1, elec, water, internet, trash);
             if (adminService.updateServiceRates(updated)) {
                 resp.sendRedirect(req.getContextPath() + "/admin/settings?msg=Updated");

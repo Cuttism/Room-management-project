@@ -35,11 +35,11 @@
 
                 <form action="${pageContext.request.contextPath}/login" method="post">
                     <div class="mb-3">
-                        <label for="username" class="form-label fw-semibold">Tên đăng nhập <span class="text-danger">*</span></label>
+                        <label for="identifier" class="form-label fw-semibold">Email hoặc Số điện thoại <span class="text-danger">*</span></label>
                         <div class="input-group">
-                            <span class="input-group-text bg-white text-muted"><i class="bi bi-person"></i></span>
-                            <input type="text" class="form-control" id="username" name="username" 
-                                   value="${enteredUsername}" placeholder="Nhập tên đăng nhập" required>
+                            <span class="input-group-text bg-white text-muted"><i class="bi bi-envelope-at"></i></span>
+                            <input type="text" class="form-control" id="identifier" name="identifier" 
+                                   value="${enteredIdentifier}" placeholder="Nhập email hoặc số điện thoại" required>
                         </div>
                     </div>
 
@@ -58,17 +58,57 @@
                             <i class="bi bi-box-arrow-in-right me-1"></i> Đăng nhập
                         </button>
                     </div>
-
-                    <div class="text-center small text-muted">
-                        Chưa có tài khoản? <a href="${pageContext.request.contextPath}/guest/register" class="text-primary fw-semibold text-decoration-none">Đăng ký ngay</a>
-                    </div>
                 </form>
+
+                <!-- Divider -->
+                <div class="d-flex align-items-center my-3">
+                    <hr class="flex-grow-1 text-muted">
+                    <span class="px-2 small text-muted">Hoặc tiếp tục với</span>
+                    <hr class="flex-grow-1 text-muted">
+                </div>
+
+                <!-- Google Sign-In Button -->
+                <form id="googleLoginForm" action="${pageContext.request.contextPath}/login/google" method="post" class="d-none">
+                    <input type="hidden" name="credential" id="googleCredentialInput">
+                </form>
+                <div class="d-flex justify-content-center mb-3">
+                    <div id="g_id_onload"
+                         data-client_id="265168256933-o1bdbborcthrks671vocs159brnb8h1v.apps.googleusercontent.com"
+                         data-context="signin"
+                         data-ux_mode="popup"
+                         data-callback="handleGoogleCredentialResponse"
+                         data-auto_prompt="false">
+                    </div>
+                    <div class="g_id_signin"
+                         data-type="standard"
+                         data-shape="rectangular"
+                         data-theme="outline"
+                         data-text="signin_with"
+                         data-size="large"
+                         data-logo_alignment="left"
+                         data-width="320">
+                    </div>
+                </div>
+
+                <div class="text-center small text-muted">
+                    Chưa có tài khoản? <a href="${pageContext.request.contextPath}/guest/register" class="text-primary fw-semibold text-decoration-none">Đăng ký ngay</a>
+                </div>
+
+                <script src="https://accounts.google.com/gsi/client" async defer></script>
+                <script>
+                    function handleGoogleCredentialResponse(response) {
+                        if (response && response.credential) {
+                            document.getElementById("googleCredentialInput").value = response.credential;
+                            document.getElementById("googleLoginForm").submit();
+                        }
+                    }
+                </script>
 
                 <!-- Quick Test Credentials Hint -->
                 <div class="mt-4 pt-3 border-top text-center text-muted small bg-light p-2 rounded-3">
-                    <div class="fw-semibold text-slate-700 mb-1"><i class="bi bi-info-circle me-1"></i>Tài khoản dùng để test:</div>
-                    <div>Admin: <code>admin</code> / <code>123456</code></div>
-                    <div>Khách: <code>khach1</code> / <code>123456</code></div>
+                    <div class="fw-semibold text-slate-700 mb-1"><i class="bi bi-info-circle me-1"></i>Tài khoản dùng để test (Email hoặc SĐT):</div>
+                    <div>Admin: <code>admin@nhatro.com</code> (hoặc <code>0901234567</code>) / <code>123456</code></div>
+                    <div>Khách: <code>an.nguyen@gmail.com</code> (hoặc <code>0912345678</code>) / <code>123456</code></div>
                 </div>
             </div>
         </div>

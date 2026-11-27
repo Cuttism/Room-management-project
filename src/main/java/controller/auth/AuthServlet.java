@@ -50,23 +50,26 @@ public class AuthServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("UTF-8");
-        String username = req.getParameter("username");
+        String identifier = req.getParameter("identifier");
+        if (identifier == null) {
+            identifier = req.getParameter("email");
+        }
         String password = req.getParameter("password");
 
-        if (username == null || username.trim().isEmpty() || password == null || password.trim().isEmpty()) {
-            req.setAttribute("errorMessage", "Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!");
-            req.setAttribute("enteredUsername", username);
+        if (identifier == null || identifier.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            req.setAttribute("errorMessage", "Vui lòng nhập đầy đủ Email/Số điện thoại và mật khẩu!");
+            req.setAttribute("enteredIdentifier", identifier);
             req.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(req, resp);
             return;
         }
 
-        username = username.trim();
-        User user = userDAO.getUserByUsername(username);
+        identifier = identifier.trim();
+        User user = userDAO.getUserByEmailOrPhone(identifier);
 
         // Verify password against PBKDF2 hash (with fallback + auto-migration for legacy plain-text passwords)
         if (user == null || !PasswordUtil.verifyPassword(password, user.getPassword())) {
-            req.setAttribute("errorMessage", "Tên đăng nhập hoặc mật khẩu không chính xác!");
-            req.setAttribute("enteredUsername", username);
+            req.setAttribute("errorMessage", "Email/Số điện thoại hoặc mật khẩu không chính xác!");
+            req.setAttribute("enteredIdentifier", identifier);
             req.getRequestDispatcher("/WEB-INF/views/auth/login.jsp").forward(req, resp);
             return;
         }

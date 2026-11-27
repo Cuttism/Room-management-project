@@ -9,7 +9,7 @@ public class User implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int userId;
-    private String username;
+    private String email;
     private String password;
     private String fullName;
     private String phone;
@@ -19,9 +19,9 @@ public class User implements Serializable {
     public User() {
     }
 
-    public User(int userId, String username, String password, String fullName, String phone, String role, boolean active) {
+    public User(int userId, String email, String password, String fullName, String phone, String role, boolean active) {
         this.userId = userId;
-        this.username = username;
+        this.email = email;
         this.password = password;
         this.fullName = fullName;
         this.phone = phone;
@@ -37,12 +37,20 @@ public class User implements Serializable {
         this.userId = userId;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getUsername() {
-        return username;
+        return email;
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        this.email = username;
     }
 
     public String getPassword() {
@@ -89,7 +97,7 @@ public class User implements Serializable {
     public String toString() {
         return "User{" +
                 "userId=" + userId +
-                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
                 ", fullName='" + fullName + '\'' +
                 ", phone='" + phone + '\'' +
                 ", role='" + role + '\'' +

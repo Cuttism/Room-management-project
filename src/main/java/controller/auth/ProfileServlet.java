@@ -72,6 +72,22 @@ public class ProfileServlet extends HttpServlet {
             return;
         }
 
+        phone = phone.trim();
+        if (!phone.matches("^0\\d{9}$")) {
+            req.setAttribute("errorMessage", "Ràng buộc dữ liệu: Số điện thoại phải gồm đúng 10 chữ số và bắt đầu bằng số 0!");
+            req.setAttribute("user", currentUser);
+            req.getRequestDispatcher(targetView).forward(req, resp);
+            return;
+        }
+
+        User existingByPhone = userDAO.getUserByPhone(phone);
+        if (existingByPhone != null && existingByPhone.getUserId() != currentUser.getUserId()) {
+            req.setAttribute("errorMessage", "Ràng buộc chống trùng: Số điện thoại '" + phone + "' đã thuộc về một tài khoản khác!");
+            req.setAttribute("user", currentUser);
+            req.getRequestDispatcher(targetView).forward(req, resp);
+            return;
+        }
+
         String passwordToSave = null;
         if (newPassword != null && !newPassword.trim().isEmpty()) {
             User dbUser = userDAO.getUserById(currentUser.getUserId());

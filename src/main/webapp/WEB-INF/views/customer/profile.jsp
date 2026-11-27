@@ -35,8 +35,8 @@
 
                 <form action="${pageContext.request.contextPath}/customer/profile" method="post">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Tên đăng nhập (Username)</label>
-                        <input type="text" class="form-control bg-light" value="<c:out value='${user.username}'/>" readonly>
+                        <label class="form-label fw-semibold">Địa chỉ Email</label>
+                        <input type="email" class="form-control bg-light" value="<c:out value='${user.email}'/>" readonly>
                     </div>
 
                     <div class="row g-3 mb-4">
